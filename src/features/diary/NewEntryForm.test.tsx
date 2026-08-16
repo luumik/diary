@@ -183,7 +183,9 @@ describe("NewEntryForm", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Title is required.",
     );
-    expect(screen.getByLabelText("Title")).toHaveFocus();
+    await waitFor(() => {
+      expect(screen.getByLabelText("Title")).toHaveFocus();
+    });
   });
 
   it("moves focus to the content field after a content validation failure", async () => {
@@ -206,7 +208,9 @@ describe("NewEntryForm", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Content is required.",
     );
-    expect(screen.getByLabelText("Content")).toHaveFocus();
+    await waitFor(() => {
+      expect(screen.getByLabelText("Content")).toHaveFocus();
+    });
   });
 
   it("shows saving feedback and disables submission while saving", () => {

@@ -1,4 +1,11 @@
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type {
@@ -998,8 +1005,12 @@ describe("DiaryBrowser", () => {
     await screen.findByRole("alert");
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
 
-    expect(
-      await screen.findByRole("button", { name: "Create your first entry" }),
-    ).toHaveFocus();
+    const createEntryButton = await screen.findByRole("button", {
+      name: "Create your first entry",
+    });
+
+    await waitFor(() => {
+      expect(createEntryButton).toHaveFocus();
+    });
   });
 });
