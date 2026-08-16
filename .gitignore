@@ -1,0 +1,21 @@
+# Dependencies and generated output
+node_modules/
+dist/
+coverage/
+.vite/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Local diary data and SQLite sidecar files
+data/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# Logs and operating-system files
+*.log
+.DS_Store
+Thumbs.db
