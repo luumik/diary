@@ -97,11 +97,42 @@ Allow files or images to be attached to entries.
 
 Consider storage limits, supported file types, malware risks, metadata privacy, deletion, backup, and orphan cleanup.
 
+#### Image attachments
+
+Allow one or more images to be attached to a diary entry and shown only within that entry.
+
+Recommended direction when this item is specified:
+
+- Store image files outside the database under an ignored local directory such as `data/attachments/`; do not store image bytes in the SQLite database.
+- Store only attachment metadata in a dedicated database table: a stable attachment ID, the diary-entry ID, the generated storage filename, original filename, media type, byte size, dimensions, and creation timestamp.
+- Generate the storage filename independently from the original filename, and never use the original filename as a filesystem path.
+- Initially accept only JPEG, PNG, WebP, and GIF after checking the actual file signature as well as the declared media type; apply a per-file size limit and a per-entry image-count limit.
+- Strip EXIF and other embedded metadata during import, or clearly explain if metadata is retained. Location data in photos is especially sensitive for a diary application.
+- Create resized display variants or thumbnails during import when needed; preserve the original only if the product has an explicit reason to do so.
+- Serve images through an application endpoint that resolves an attachment ID rather than exposing the storage directory directly.
+- Delete image files and their metadata together when an entry is deleted. Include a safe orphan-cleanup process for interrupted imports or failed deletes.
+- Include attachments in backup and restore with an integrity manifest; document that images can make backups significantly larger.
+
+The feature needs its own specification, migration, storage-failure behavior, privacy review, and tests before implementation.
+
 ### Reminders and notifications
 
 Allow the user to schedule private reminders related to diary activity or entries.
 
 Notification content must not reveal sensitive diary information on a locked or shared device by default.
+
+## Interface and device support
+
+### Full responsive phone and tablet layout
+
+Make every primary diary workflow comfortable to use on phone and tablet viewports, including widths below 1024 px.
+
+Consider before implementation:
+
+- layout and navigation patterns for narrow screens
+- touch target sizes and input ergonomics
+- landscape orientation and dynamic browser chrome
+- automated viewport coverage and manual accessibility testing
 
 ## Operations and deployment
 

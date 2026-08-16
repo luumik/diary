@@ -22,7 +22,7 @@ The project is in its early stages. Do not assume a framework, database, or UI l
 
 ## Instructions for agents
 
-1. Before making changes, read at least `package.json`, `tsconfig.json`, `specs/diary.md`, and the source and test files relevant to the task.
+1. Before making changes, read at least `package.json`, `tsconfig.json`, `specs/diary.md`, `TASKS.md`, and the source and test files relevant to the task.
 2. Check the working tree before making broad changes. Do not remove or overwrite the user's work in progress.
 3. Implement only the requested change. Avoid unrelated refactoring and new dependencies unless there is a clear need.
 4. Update tests whenever behavior changes.
@@ -38,6 +38,7 @@ The project is in its early stages. Do not assume a framework, database, or UI l
 - Design application and persistence boundaries so that user context and entry ownership can be introduced later without rewriting the core diary functionality.
 - Do not hard-code a global current user or add speculative authentication abstractions.
 - Treat `specs/diary.md` as the source of truth for product behavior and MVP scope. Update it when requirements change.
+- Treat `TASKS.md` as the implementation worklist. Keep it aligned with completed work, but do not use it to override the product specification.
 
 ## Commands
 

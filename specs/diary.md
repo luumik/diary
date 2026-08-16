@@ -15,7 +15,7 @@ The MVP includes:
 - deleting an entry after explicit confirmation
 - persisting entries between application restarts
 - clear empty, loading, validation, and error states
-- a responsive and keyboard-usable interface
+- a keyboard-usable desktop and laptop interface
 
 The MVP does not include:
 
@@ -26,6 +26,7 @@ The MVP does not include:
 - attachments, images, comments, reminders, or notifications
 - analytics containing diary content
 - deployment to a public or otherwise untrusted network
+- full responsive support for phone and tablet viewports
 
 ## Diary entry
 
@@ -68,7 +69,8 @@ Timestamps are stored as UTC ISO 8601 values. The UI formats dates and timestamp
 2. The form accepts a title, content, entry date, and optional comma-separated tags.
 3. The entry date defaults to the user's current local date.
 4. Invalid input keeps the entered values visible and displays field-level feedback.
-5. A successful save persists the entry, opens the saved entry, and provides clear success feedback.
+5. A persistence failure keeps the form and entered values visible, displays a non-sensitive error message, and allows a retry.
+6. A successful save persists the entry, opens the saved entry, and provides clear success feedback.
 
 ### Edit an entry
 
@@ -111,7 +113,7 @@ Timestamps are stored as UTC ISO 8601 values. The UI formats dates and timestamp
 - Validation and operation errors must be presented as text and must not rely on color alone.
 - Focus should move predictably after navigation, validation failure, and confirmation dialogs.
 - Destructive actions must be visually and semantically distinguishable from ordinary actions.
-- The main workflows must remain usable without horizontal page scrolling at viewport widths of 320 px and 1280 px.
+- The main workflows must remain usable without horizontal page scrolling at viewport widths of 1024 px and 1280 px.
 
 ## Test expectations
 
@@ -260,6 +262,7 @@ Given persistence is unavailable or an operation fails<br>
 When the user attempts to save or delete an entry<br>
 Then the application displays a non-sensitive error message<br>
 And does not falsely report success<br>
+And a failed save keeps the entered values available for retry<br>
 And existing persisted data is not silently lost
 
 #### AC-18 — Safe text rendering
@@ -284,9 +287,9 @@ When the user navigates through each primary CRUD workflow<br>
 Then all controls can be reached and activated using the keyboard<br>
 And keyboard focus remains visible and moves predictably
 
-#### AC-21 — Responsive layout
+#### AC-21 — Desktop and laptop layout
 
-Given the application is opened at a viewport width of 320 px or 1280 px<br>
+Given the application is opened at a desktop or laptop viewport width of 1024 px or 1280 px<br>
 When the user completes each primary CRUD workflow<br>
 Then all required content and controls remain usable<br>
 And the page does not require horizontal scrolling
