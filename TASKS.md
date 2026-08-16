@@ -18,11 +18,11 @@ Completed:
 - React, Vite, Express, TypeScript, Vitest, and React Testing Library are configured.
 - `dev`, `dev:api`, `dev:web`, `test`, and `test:watch` npm scripts are available.
 - The local API and Vite development server bind to loopback only.
-- TypeScript checking is available with `npx tsc --noEmit`.
+- TypeScript checking is available with `npx tsc`.
 
 Verification:
 
-- `npm run dev`, `npm test`, and `npx tsc --noEmit` work.
+- `npm run dev`, `npm test`, and `npx tsc` work.
 - Server-start tests verify loopback-only binding.
 
 ## T-02 - Implement the diary domain and validation

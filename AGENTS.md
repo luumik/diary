@@ -6,13 +6,16 @@ Diary is a single-user TypeScript web application that allows its user to create
 
 The current goal is a local single-user MVP. Authentication, user accounts, authorization roles, password management, and multi-user support are explicitly out of scope. Do not add them unless the project requirements are updated.
 
-The project is in its early stages. Do not assume a framework, database, or UI library unless it is present in the source code or project dependencies. Prefer small, well-justified changes and preserve existing decisions unless the task requires changing them.
+The project has an established local MVP stack. Prefer small, well-justified changes and preserve existing decisions unless the task requires changing them. Do not add a framework, database, UI library, or dependency that is not already present unless there is a clear task-specific need.
 
 ## Current technical foundation
 
-- TypeScript in strict mode
-- Node.js and npm
-- Vitest for testing
+- TypeScript in strict mode with `noEmit`
+- React and Vite for the browser UI
+- Node.js and Express for the loopback-only local API
+- SQLite, Drizzle ORM, and versioned migrations for persistence
+- Zod for validation at trust boundaries
+- Vitest and React Testing Library for testing
 - ES modules are the target; keep `package.json` and `tsconfig.json` compatible when changing module settings
 
 ## Communication
@@ -42,7 +45,9 @@ The project is in its early stages. Do not assume a framework, database, or UI l
 
 ## Commands
 
-Prefer scripts defined in `package.json`. During the project's early stages, not all of the following scripts may be available:
+Prefer scripts defined in `package.json`. Do not assume that commands not listed there are available.
+
+The currently available commands are `npm test`, `npm run test:watch`, `npm run dev`, `npm run dev:api`, `npm run dev:web`, and `npx tsc`. Lint and production-build scripts are not configured yet.
 
 - `npm test` — run tests
 - `npm run lint` — run linting when the script is defined
