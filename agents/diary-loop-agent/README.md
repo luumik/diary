@@ -16,6 +16,6 @@ python agents/diary-loop-agent/diary_loop_agent.py lookup --place Tampere --date
 
 The default command and `verify` run the weather agent's deterministic Python tests, then send a fictional Helsinki/date request to the local weather-agent HTTP API. A successful run stops with `weather_verified`. `--verify` remains supported for existing scheduled commands.
 
-`lookup` performs one user-requested lookup against the local weather-agent API. It requires an explicit place and ISO date and prints the validated JSON response; it does not update loop state or the Diary database.
+`lookup` performs one user-requested lookup against the local weather-agent API. It requires an explicit place and ISO date and prints the validated JSON response; it does not update loop state or the Diary database. The printed location, date, and summary may be sensitive and must not be copied into logs or reports without the user's explicit request.
 
 The default state file is `agents/diary-loop-agent/memory/data/loop_state.json`; it is ignored by Git.

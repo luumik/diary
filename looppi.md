@@ -27,9 +27,11 @@ This document defines the operating rules for Codex task work started with `/goa
 ## Test-data and privacy boundaries
 
 - Do not delete, edit, or create records in the user's Diary database.
+- Do not read, print, copy, migrate, or inspect the user's `data/diary.sqlite` or its sidecar files. Use a separate temporary database whenever database access is required for verification.
 - Use only a separate temporary test database and fictional test data for browser or end-to-end testing. The weather CLI verification mode does not access a Diary database.
 - Do not read, write, rename, print, or otherwise access `.env`, `.env.local`, or other environment-setting files or their values. Do not modify `.env.example` unless a separately approved task requires it.
 - Keep the weather agent's primary tests deterministic. A live Open-Meteo lookup is optional and must be reported separately from the deterministic test result.
+- Do not push commits, publish releases, deploy services, create network tunnels, or bind a service outside loopback unless the user explicitly requests that external action.
 
 ## Runtime state
 

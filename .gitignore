@@ -22,3 +22,7 @@ data/
 *.log
 .DS_Store
 Thumbs.db
+
+# Local agent reference implementations
+agents/homework-coach-agent/
+agents/gemini_agent.py

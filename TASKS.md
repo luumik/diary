@@ -8,7 +8,7 @@ This file tracks implementation work for the approved single-user MVP. It is a w
 - Mark a task `Done` only after its relevant verification has passed.
 - Add new MVP work here before implementation. Add deferred ideas to `INBOX.md` instead.
 - Keep implementation commits focused. Reference the task identifier in a commit message when practical.
-- Open tasks use `Priority: High`, `Priority: Medium`, or `Priority: Low`. A loop agent selects the highest-priority open task; `In progress` takes precedence over `Todo` at the same priority.
+- Open tasks use `Priority: High`, `Priority: Medium`, or `Priority: Low`. A Codex task loop selects the highest-priority open task; `In progress` takes precedence over `Todo` at the same priority. The local Diary Loop Agent CLI does not select or modify tasks.
 
 ## T-01 - Bootstrap the application
 
@@ -196,6 +196,8 @@ Status: Done
 
 Priority: High
 
+Historical note: The task-selection and generic-verification behavior below was superseded by T-15 and T-16. The current Diary Loop Agent CLI verifies only the weather agent; Codex task loops follow `looppi.md`.
+
 Scope:
 
 - Add a deterministic CLI orchestrator that selects the highest-priority open task and records local loop state atomically.
@@ -218,6 +220,8 @@ Completed:
 Status: Done
 
 Priority: High
+
+Historical note: This Windows launcher scope was superseded when T-15 reduced the CLI verification path to Python weather-agent checks.
 
 Scope:
 

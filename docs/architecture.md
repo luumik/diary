@@ -37,7 +37,7 @@ Dependencies flow inward: UI and API code may depend on application services; ap
 - The Express API binds only to `127.0.0.1` on port `3000`.
 - Vite binds only to `127.0.0.1` and proxies `/api` requests to the API.
 - The local server creates `data/` as needed and stores the SQLite database at `data/diary.sqlite`.
-- The initial diary-entry schema is applied through a versioned migration when the repository opens the database.
+- The diary-entry schema and later weather-metadata columns are applied through ordered, versioned migrations when the repository opens the database. Applied migrations are immutable; later schema changes require a new migration.
 
 ## Future compatibility
 

@@ -117,8 +117,9 @@ Timestamps are stored as UTC ISO 8601 values. The UI formats dates and timestamp
 ## Privacy and operational constraints
 
 - Treat all diary content as sensitive.
-- Do not include diary titles, content, or tags in application logs, analytics, error reports, or thrown error messages.
+- Do not include diary titles, content, tags, entry dates, weather locations, weather descriptions, or other user-entered diary values in application logs, analytics, error reports, or thrown error messages.
 - Never send a diary title, content, tags, or saved weather description to Open-Meteo. A lookup may send the user-entered place, resolved coordinates, and entry date.
+- The weather integration may communicate only with the documented Open-Meteo geocoding and historical-weather endpoints. Do not allow user input to select an arbitrary upstream URL.
 - Do not persist resolved coordinates. Persist only the display location, generated description, and source attribution with the diary entry.
 - Use the Open-Meteo free API only for this non-commercial project and show attribution with saved weather metadata.
 - Use only fictional diary content in tests and fixtures.
@@ -297,9 +298,9 @@ And no embedded markup or script is executed
 
 #### AC-19 — Sensitive-data logging
 
-Given a diary entry is created, read, updated, or deleted<br>
+Given a diary entry is created, read, updated, deleted, or enriched with weather metadata<br>
 When application logs and error messages are inspected<br>
-Then they do not contain the entry title, content, or tags
+Then they do not contain user-entered diary values, including the title, content, tags, entry date, weather location, or weather description
 
 ### Quality criteria
 

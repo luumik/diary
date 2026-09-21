@@ -21,4 +21,8 @@ python -m pytest agents/weather-agent/tests -q
 
 [Open-Meteo](https://open-meteo.com/)'s free API is for non-commercial use and requires attribution under CC BY 4.0. The agent sends only the place query, resolved coordinates, and date to Open-Meteo. Diary titles and content are never sent.
 
+Diary titles, content, tags, saved weather descriptions, and other entry fields must never be sent to Open-Meteo. The agent may call only the documented Open-Meteo geocoding and historical-weather endpoints, and it must not persist resolved coordinates.
+
+The standalone CLI stores its latest successful lookup in `memory/data/latest.json`. This ignored local file contains the resolved display location, lookup date, generated summary, and source. Treat it as sensitive local data and delete it when the history is no longer needed. The FastAPI service used by the Diary application does not write this CLI memory file.
+
 The rule set recognizes clear, cloudy, foggy, rainy, snowy, showery, stormy, hot, and freezing conditions. `Myrskyinen` requires a daily maximum sustained wind of at least 89 km/h. The agent never labels weather as a hurricane or typhoon because a single-location daily record cannot establish a tropical cyclone classification.

@@ -15,6 +15,9 @@ Fetch daily Open-Meteo data and turn it into a deterministic Finnish diary descr
 - `fetch_weather`: Geocode the place, retrieve daily weather, and apply the rule set.
 
 ## Safety
-- Send no diary title or content to Open-Meteo.
+- Send only the user-entered place, resolved coordinates, and entry date to the documented Open-Meteo endpoints.
+- Send no diary title, content, tags, saved weather description, or other diary-entry fields to Open-Meteo.
+- Do not persist resolved coordinates.
+- Treat the place, date, display location, and generated summary as sensitive local data; do not log them.
 - Do not claim a hurricane or typhoon from local measurements alone.
 - Attribute saved results to Open-Meteo.

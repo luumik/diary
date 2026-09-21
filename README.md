@@ -83,6 +83,12 @@ Run tests in watch mode:
 npm run test:watch
 ```
 
+Run only the weather-agent tests:
+
+```sh
+npm run test:weather
+```
+
 Run TypeScript checking until a dedicated script is added:
 
 ```sh
@@ -109,6 +115,8 @@ The default command runs weather-agent tests and a fictional local weather looku
 The local runtime stores its SQLite database under `data/`. That directory and SQLite sidecar files are ignored by Git, because they may contain private diary content.
 
 Do not commit real diary data, secrets, or local database files. Treat all entry titles, content, tags, and weather metadata as sensitive; do not log or send them to analytics. A weather lookup sends only the entered place, resolved coordinates, and entry date to Open-Meteo. The saved description includes `Säädata: Open-Meteo` attribution.
+
+The standalone weather-agent CLI stores its latest successful lookup in `agents/weather-agent/memory/data/latest.json`. The file may contain a location, date, weather summary, and source, so treat it as sensitive local data. It is ignored by Git. Delete it when the lookup history is no longer needed; the Diary web application's normal weather lookup does not depend on this file.
 
 ## Recommended next steps
 

@@ -47,13 +47,15 @@ The project has an established local MVP stack. Prefer small, well-justified cha
 
 Prefer scripts defined in `package.json`. Do not assume that commands not listed there are available.
 
-The currently available commands are `npm test`, `npm run test:watch`, `npm run dev`, `npm run dev:api`, `npm run dev:web`, and `npx tsc`. Lint and production-build scripts are not configured yet.
+The currently available commands are `npm test`, `npm run test:watch`, `npm run dev`, `npm run dev:api`, `npm run dev:web`, `npm run dev:weather`, `npm run test:weather`, and `npx tsc`. Lint and production-build scripts are not configured yet.
 
 - `npm test` — run tests
 - `npm run lint` — run linting when the script is defined
 - `npm run typecheck` — run TypeScript type checking when the script is defined
 - `npm run build` — build the application when the script is defined
 - `npm run dev` — start the development server when the script is defined
+- `npm run dev:weather` — start the loopback-only weather agent
+- `npm run test:weather` — run the weather-agent tests
 
 Do not assume `npm run start` is available unless it is defined in `package.json`.
 
@@ -73,13 +75,17 @@ Do not assume `npm run start` is available unless it is defined in `package.json
 
 - Treat all diary entries as private even though the MVP has no authentication.
 - The MVP is intended for local, single-user use. Document that it must not be exposed directly to an untrusted network in this form.
-- Do not log diary content or other sensitive information.
+- Treat the title, content, tags, entry date, weather metadata, and locally stored weather lookup history as sensitive. Do not log, report, or send these values to analytics.
 - Do not add secrets, real personal information, or production data to source code, tests, example files, or version control.
 - Use clearly fictional data in tests.
 - Prevent stored XSS: do not render user-provided content as unprocessed HTML.
 - Use parameterized database queries or safe ORM interfaces.
 - Test data-deletion behavior carefully because deleted diary content may not be recoverable.
 - When adding an environment variable, update a safe example file, but never add a real `.env` file or secret value.
+- Never read, print, copy, modify, migrate, or delete the user's `data/diary.sqlite` or its sidecar files unless the user explicitly requests an operation on their real data. Tests, browser verification, migrations, and debugging must use a separate temporary database with fictional data.
+- The weather integration may contact only the documented Open-Meteo endpoints. Do not send diary fields other than the user-entered place and entry date; do not persist resolved coordinates.
+- Do not push commits, publish releases, deploy the application, create tunnels, change a service to a non-loopback host, or otherwise modify an external system unless the user explicitly requests that action.
+- Treat live network checks separately from deterministic verification. Do not present a live check as part of deterministic test results.
 
 ## Testing requirements
 
@@ -110,3 +116,4 @@ A change is complete when:
 - Do not add a dependency for a trivial helper function.
 - Do not edit generated files or the `node_modules` directory.
 - Do not make a breaking database-schema change without a migration and a compatibility assessment.
+- Do not edit an already-applied migration. Add a new versioned migration and test it against a temporary database.
