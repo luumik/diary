@@ -31,6 +31,19 @@ The project has an established local MVP stack. Prefer small, well-justified cha
 4. Update tests whenever behavior changes.
 5. Run the checks relevant to the change and report what you ran and whether it passed.
 6. If a required npm script has not been defined, do not claim to have run it. Add the script only when doing so is within the scope of the task.
+7. Use `docs/agent-workflows.md` only for the workflow relevant to the request: research, specification, development, diagnosis and fix, review, or final audit.
+8. Use `specs/feature-template.md` when a new approved feature needs its own specification. Do not create a feature specification for a minor documentation or mechanical change.
+9. Consult `docs/learnings.md` when a recurring technical problem is relevant. Add an entry only when the verified lesson is likely to prevent the same non-trivial problem in future work.
+
+## Instruction sources and precedence
+
+- `specs/diary.md` defines approved product behavior and MVP scope.
+- `TASKS.md` contains approved implementation work; `INBOX.md` contains unapproved ideas that must not be implemented.
+- This file defines persistent engineering, privacy, and safety constraints.
+- `looppi.md` adds bounded orchestration rules for Codex task loops.
+- `docs/agent-workflows.md` provides task-specific procedures and does not override the sources above.
+- `docs/ci-policy.md` is a draft design until an approved task implements CI. It is not an executable pipeline or permission to create one.
+- `example_agents_md/` contains non-operative reference material. Do not read or apply it unless the user explicitly requests work on that reference.
 
 ## Architecture and future compatibility
 

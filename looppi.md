@@ -2,6 +2,8 @@
 
 This document defines the operating rules for Codex task work started with `/goal` or `/loop`. It is not executed by the weather-agent CLI verifier.
 
+Use the applicable procedure in `docs/agent-workflows.md` during an iteration. That document supplements this loop plan but cannot expand task scope, permissions, iteration limits, or access to user data.
+
 ## Task selection and scope
 
 1. Read `TASKS.md` and select the highest-priority open task. `In progress` takes precedence over `Todo` at the same priority.

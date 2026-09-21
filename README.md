@@ -4,9 +4,11 @@ Diary is a local, single-user diary application for creating, reading, updating,
 
 The current MVP targets desktop and laptop browsers at widths of 1024 px and above. Full phone and tablet responsiveness is deferred to [INBOX.md](INBOX.md).
 
-The product requirements and acceptance criteria are in [specs/diary.md](specs/diary.md). Deferred ideas are collected in [INBOX.md](INBOX.md).
+The product requirements and acceptance criteria are in [specs/diary.md](specs/diary.md). Deferred ideas are collected in [INBOX.md](INBOX.md). Reusable agent procedures are in [docs/agent-workflows.md](docs/agent-workflows.md), and new approved features can use [specs/feature-template.md](specs/feature-template.md).
 
 The operating rules for Codex task work are in [looppi.md](looppi.md). The local [Diary Loop Agent](agents/diary-loop-agent/README.md) verifies only the weather agent; it does not modify Diary data, source code, task status, or environment files.
+
+The proposed CI contract is documented as a non-operative draft in [docs/ci-policy.md](docs/ci-policy.md). No CI or deployment pipeline currently exists.
 
 ## Current status
 

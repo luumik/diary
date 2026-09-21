@@ -136,6 +136,27 @@ Consider before implementation:
 
 ## Operations and deployment
 
+### Local containerized runtime
+
+Run Diary locally with Docker Compose to improve dependency isolation, reproducibility, and separation from the host system. Containerization is an additional defense layer, not a replacement for application validation, privacy controls, backups, or loopback-only access.
+
+Consider before implementation:
+
+- add and verify a production build before using containers as the normal runtime; do not rely on the Vite development server for a production-like package
+- keep the browser-facing port bound explicitly to `127.0.0.1`; do not use an unrestricted host-port mapping
+- place the web, Express API, and weather agent in separate services or document why a smaller service layout is preferable
+- expose only the browser-facing service to the host; keep API-to-weather communication on an internal Compose network
+- account for container networking: services may need to listen on all interfaces inside their containers while remaining unavailable from the host unless explicitly published
+- run containers as non-root users with dropped capabilities, `no-new-privileges`, read-only root filesystems, and narrowly scoped writable locations
+- use a dedicated named volume only for `data/`; do not mount the entire repository or user home directory into runtime containers
+- document backup, restore, deletion, and migration behavior for the SQLite volume before treating it as the normal data location
+- preserve the existing rule that real diary data must not be used in automated tests or image builds
+- keep secrets and `.env` files out of images and build contexts
+- define health checks, startup ordering, shutdown behavior, and resource limits
+- do not mount the Docker socket or use privileged containers
+- assess outbound-network controls separately: Docker networking alone does not enforce an Open-Meteo-only allowlist
+- document Docker Desktop licensing assumptions and provide a non-Docker local-development path where practical
+
 ### Secure hosted deployment
 
 Deploy the application beyond the local machine after authentication, authorization, managed persistence, transport security, secrets management, backups, and an operational security review are in place.
