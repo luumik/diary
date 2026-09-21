@@ -4,9 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "concurrently --kill-others-on-fail --names api,web \"npm run dev:api\" \"npm run dev:web\"",
+    "dev": "concurrently --kill-others-on-fail --names api,web,weather \"npm run dev:api\" \"npm run dev:web\" \"npm run dev:weather\"",
     "dev:api": "tsx watch src/server/main.ts",
     "dev:web": "vite",
+    "dev:weather": "python agents/weather-agent/api/main.py",
+    "test:weather": "python -m pytest agents/weather-agent/tests -q",
     "test": "vitest run",
     "test:watch": "vitest"
   },

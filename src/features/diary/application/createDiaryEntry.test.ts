@@ -148,4 +148,37 @@ describe("createDiaryEntry", () => {
       updatedAt: "2026-08-16T10:15:00.000Z",
     });
   });
+
+  it("normalizes and persists optional weather metadata", async () => {
+    const repository = {
+      save: vi.fn(async (entry: DiaryEntry) => entry),
+    };
+
+    await createDiaryEntry({
+      input: {
+        title: "A warm day",
+        content: "A fictional holiday entry.",
+        entryDate: "2026-08-16",
+        tags: [],
+        weather: {
+          location: " Helsinki, Suomi ",
+          summary: " Päivä oli kirkas ja aurinkoinen. ",
+          source: " Open-Meteo ",
+        },
+      },
+      repository,
+      generateId: () => "entry-weather",
+      now: () => "2026-08-16T10:15:00.000Z",
+    });
+
+    expect(repository.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        weather: {
+          location: "Helsinki, Suomi",
+          summary: "Päivä oli kirkas ja aurinkoinen.",
+          source: "Open-Meteo",
+        },
+      }),
+    );
+  });
 });

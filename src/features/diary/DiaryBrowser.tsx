@@ -13,6 +13,7 @@ import type {
 import { DiaryEntryDetail } from "./DiaryEntryDetail";
 import { DiaryList, type DiaryListFocusTarget } from "./DiaryList";
 import { NewEntryForm } from "./NewEntryForm";
+import type { WeatherSummary } from "./domain/weather";
 
 type DiaryBrowserFocusTarget =
   | { readonly kind: "detail-navigation" }
@@ -33,6 +34,7 @@ export interface DiaryBrowserProps {
   ) => Promise<UpdateDiaryEntryResult>;
   readonly deleteEntry: (id: string) => Promise<DeleteDiaryEntryResult>;
   readonly today: () => string;
+  readonly fetchWeather?: (place: string, date: string) => Promise<WeatherSummary>;
 }
 
 export function DiaryBrowser({
@@ -42,6 +44,7 @@ export function DiaryBrowser({
   updateEntry,
   deleteEntry,
   today,
+  fetchWeather,
 }: DiaryBrowserProps) {
   const [entries, setEntries] = useState<readonly DiaryEntry[] | undefined>(undefined);
   const [selectedEntry, setSelectedEntry] = useState<DiaryEntry | undefined>(undefined);
@@ -390,6 +393,12 @@ export function DiaryBrowser({
         today={today}
         operationError={createErrorMessage}
         onSubmit={handleCreateEntry}
+        onCancel={() => {
+          showEntryList();
+          setFocusTarget({ kind: "create-action" });
+        }}
+        cancelLabel="Cancel creation"
+        {...(fetchWeather === undefined ? {} : { onFetchWeather: fetchWeather })}
       />
     );
   }
@@ -398,10 +407,19 @@ export function DiaryBrowser({
     return (
       <NewEntryForm
         today={today}
-        initialInput={entryBeingEdited}
+        initialInput={{
+          title: entryBeingEdited.title,
+          content: entryBeingEdited.content,
+          entryDate: entryBeingEdited.entryDate,
+          tags: entryBeingEdited.tags,
+          ...(entryBeingEdited.weather === undefined
+            ? {}
+            : { weather: entryBeingEdited.weather }),
+        }}
         onSubmit={handleUpdateEntry}
         onCancel={cancelEditing}
         submitLabel="Save changes"
+        {...(fetchWeather === undefined ? {} : { onFetchWeather: fetchWeather })}
       />
     );
   }

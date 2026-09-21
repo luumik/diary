@@ -241,4 +241,59 @@ describe("NewEntryForm", () => {
 
     expect(onSubmit).toHaveBeenCalledOnce();
   });
+
+  it("fetches a Finnish weather summary and includes it in the submitted entry", async () => {
+    const onFetchWeather = vi.fn(async () => ({
+      location: "Helsinki, Suomi",
+      date: "2026-08-16",
+      summary: "Päivä oli kirkas ja aurinkoinen.",
+      source: "Open-Meteo",
+    }));
+    const onSubmit = vi.fn(async () => ({ isValid: true as const }));
+    render(
+      <NewEntryForm
+        today={() => "2026-08-16"}
+        onSubmit={onSubmit}
+        onFetchWeather={onFetchWeather}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText("Title"), { target: { value: "Holiday" } });
+    fireEvent.change(screen.getByLabelText("Content"), { target: { value: "A fictional day." } });
+    fireEvent.change(screen.getByLabelText("Paikkakunta"), { target: { value: "Helsinki" } });
+    fireEvent.click(screen.getByRole("button", { name: "Hae sää" }));
+
+    expect(await screen.findByDisplayValue("Päivä oli kirkas ja aurinkoinen.")).toBeVisible();
+    expect(screen.getByText("Säädata: Open-Meteo")).toBeVisible();
+    expect(onFetchWeather).toHaveBeenCalledWith("Helsinki", "2026-08-16");
+
+    fireEvent.click(screen.getByRole("button", { name: "Save entry" }));
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({
+        weather: {
+          location: "Helsinki, Suomi",
+          summary: "Päivä oli kirkas ja aurinkoinen.",
+          source: "Open-Meteo",
+        },
+      }));
+    });
+  });
+
+  it("keeps form values when weather lookup fails", async () => {
+    const onFetchWeather = vi.fn(async () => {
+      throw new Error("Agent unavailable");
+    });
+    render(<NewEntryForm today={() => "2026-08-16"} onFetchWeather={onFetchWeather} />);
+    fireEvent.change(screen.getByLabelText("Title"), { target: { value: "Fictional title" } });
+    fireEvent.change(screen.getByLabelText("Content"), { target: { value: "Fictional content" } });
+    fireEvent.change(screen.getByLabelText("Paikkakunta"), { target: { value: "Turku" } });
+    fireEvent.click(screen.getByRole("button", { name: "Hae sää" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Säätietojen hakeminen epäonnistui. Yritä uudelleen.",
+    );
+    expect(screen.getByLabelText("Title")).toHaveValue("Fictional title");
+    expect(screen.getByLabelText("Content")).toHaveValue("Fictional content");
+    expect(screen.getByLabelText("Paikkakunta")).toHaveValue("Turku");
+  });
 });

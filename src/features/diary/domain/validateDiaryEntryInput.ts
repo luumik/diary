@@ -3,9 +3,16 @@ export interface DiaryEntryInput {
   readonly content: string;
   readonly entryDate: string;
   readonly tags: readonly string[];
+  readonly weather?: WeatherMetadata;
 }
 
-type FieldName = "title" | "content" | "entryDate" | "tags";
+export interface WeatherMetadata {
+  readonly location: string;
+  readonly summary: string;
+  readonly source: string;
+}
+
+type FieldName = "title" | "content" | "entryDate" | "tags" | "weather";
 
 export type ValidationResult =
   | { readonly isValid: true }
@@ -92,6 +99,28 @@ export function validateDiaryEntryInput(
       isValid: false,
       errors: { tags: "An entry can have at most 20 tags." },
     };
+  }
+
+  if (input.weather !== undefined) {
+    const { location, summary, source } = input.weather;
+
+    if (
+      location.trim().length === 0 ||
+      summary.trim().length === 0 ||
+      source.trim().length === 0
+    ) {
+      return {
+        isValid: false,
+        errors: { weather: "Weather location, description, and source are required together." },
+      };
+    }
+
+    if (location.length > 200 || summary.length > 1_000 || source.length > 100) {
+      return {
+        isValid: false,
+        errors: { weather: "Weather information is too long." },
+      };
+    }
   }
 
   return { isValid: true };

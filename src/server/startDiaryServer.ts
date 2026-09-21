@@ -3,12 +3,14 @@ import { createServer, type Server } from "node:http";
 
 import { SqliteDiaryEntryRepository } from "../features/diary/infrastructure/SqliteDiaryEntryRepository";
 import { createDiaryApi } from "./createDiaryApi";
+import { createWeatherAgentClient } from "./WeatherAgentClient";
 
 const loopbackHost = "127.0.0.1";
 
 export interface StartDiaryServerOptions {
   readonly databasePath: string;
   readonly port?: number;
+  readonly weatherAgentUrl?: string;
 }
 
 export interface RunningDiaryServer {
@@ -53,12 +55,14 @@ function closeHttpServer(server: Server): Promise<void> {
 export async function startDiaryServer({
   databasePath,
   port = 0,
+  weatherAgentUrl = "http://127.0.0.1:8002",
 }: StartDiaryServerOptions): Promise<RunningDiaryServer> {
   const repository = await SqliteDiaryEntryRepository.open({ databasePath });
   const api = createDiaryApi({
     repository,
     generateId: randomUUID,
     now: () => new Date().toISOString(),
+    weatherAgent: createWeatherAgentClient(weatherAgentUrl),
   });
   const server = createServer(api);
 

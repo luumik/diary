@@ -103,4 +103,31 @@ describe("validateDiaryEntryInput", () => {
       errors: { tags: "An entry can have at most 20 tags." },
     });
   });
+
+  it("accepts complete optional weather metadata", () => {
+    expect(
+      validateDiaryEntryInput({
+        ...validInput(),
+        weather: {
+          location: "Helsinki, Suomi",
+          summary: "Päivä oli kirkas ja aurinkoinen.",
+          source: "Open-Meteo",
+        },
+      }),
+    ).toEqual({ isValid: true });
+  });
+
+  it("rejects incomplete weather metadata", () => {
+    expect(
+      validateDiaryEntryInput({
+        ...validInput(),
+        weather: { location: "Helsinki", summary: " ", source: "Open-Meteo" },
+      }),
+    ).toEqual({
+      isValid: false,
+      errors: {
+        weather: "Weather location, description, and source are required together.",
+      },
+    });
+  });
 });

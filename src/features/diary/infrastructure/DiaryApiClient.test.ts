@@ -143,4 +143,22 @@ describe("DiaryApiClient", () => {
       "Unable to communicate with the diary API.",
     );
   });
+
+  it("fetches and validates a weather-agent summary", async () => {
+    const weather = {
+      location: "Helsinki, Suomi",
+      date: "2026-08-16",
+      summary: "Päivä oli kirkas ja aurinkoinen.",
+      source: "Open-Meteo",
+    };
+    const request = vi.fn(async () => jsonResponse(weather));
+    const client = createDiaryApiClient({ baseUrl, request });
+
+    await expect(client.fetchWeather("Helsinki", weather.date)).resolves.toEqual(weather);
+    expect(request).toHaveBeenCalledWith(`${baseUrl}/api/weather-summary`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ place: "Helsinki", date: weather.date }),
+    });
+  });
 });

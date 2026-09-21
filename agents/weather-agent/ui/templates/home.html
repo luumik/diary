@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="fi">
+  <head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Sääagentti</title></head>
+  <body>
+    <main>
+      <h1>Päiväkirjan sääagentti</h1>
+      <form method="post">
+        <label>Paikkakunta <input name="place" value="{{ place }}" required></label>
+        <label>Päivämäärä <input name="date" type="date" value="{{ date }}" required></label>
+        <button type="submit">Hae sää</button>
+      </form>
+      {% if error %}<p role="alert">{{ error }}</p>{% endif %}
+      {% if result %}<section><h2>{{ result.location }}</h2><p>{{ result.summary }}</p><small>Säädata: {{ result.source }}</small></section>{% endif %}
+    </main>
+  </body>
+</html>

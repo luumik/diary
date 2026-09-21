@@ -402,3 +402,27 @@ textarea:focus-visible {
     border-radius: 1rem;
   }
 }
+
+.weather-fields {
+  display: grid;
+  gap: 0.7rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid var(--border-color, #c8c2b8);
+  border-radius: 0.75rem;
+}
+
+.weather-fields .secondary-action {
+  justify-self: start;
+}
+
+.weather-source {
+  color: #625c52;
+  font-size: 0.875rem;
+}
+
+.weather-detail {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #d8d1c5;
+}

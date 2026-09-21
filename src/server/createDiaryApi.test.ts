@@ -36,6 +36,45 @@ function stopServer(server: Server): Promise<void> {
 }
 
 describe("createDiaryApi", () => {
+  it("proxies a weather request without diary content", async () => {
+    const repository = {
+      save: vi.fn(async (entry: DiaryEntry) => entry),
+      list: vi.fn(async () => []),
+      findById: vi.fn(async () => undefined),
+      update: vi.fn(async (entry: DiaryEntry) => entry),
+      deleteById: vi.fn(async () => false),
+    };
+    const weather = {
+      location: "Helsinki, Suomi",
+      date: "2024-06-01",
+      summary: "Päivä oli kirkas ja aurinkoinen.",
+      source: "Open-Meteo",
+    };
+    const weatherAgent = {
+      getSummary: vi.fn(async () => weather),
+    };
+    const server = createServer(createDiaryApi({
+      repository,
+      generateId: () => "generated-id",
+      now: () => "2026-01-02T08:00:00.000Z",
+      weatherAgent,
+    }));
+    const port = await startServer(server);
+
+    try {
+      const response = await fetch(`http://127.0.0.1:${port}/api/weather-summary`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ place: "Helsinki", date: "2024-06-01" }),
+      });
+      expect(response.status).toBe(200);
+      expect(await response.json()).toEqual(weather);
+      expect(weatherAgent.getSummary).toHaveBeenCalledWith("Helsinki", "2024-06-01");
+    } finally {
+      await stopServer(server);
+    }
+  });
+
   it("creates an entry through POST /api/entries", async () => {
     const timestamp = "2026-08-16T10:15:00.000Z";
     const savedEntry: DiaryEntry = {

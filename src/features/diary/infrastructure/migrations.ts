@@ -1,13 +1,17 @@
 import type Database from "better-sqlite3";
 
 import { createDiaryEntriesMigration } from "./migrations/0001_createDiaryEntries";
+import { addWeatherMetadataMigration } from "./migrations/0002_addWeatherMetadata";
 
 interface Migration {
   readonly id: string;
   readonly sql: string;
 }
 
-const migrations: readonly Migration[] = [createDiaryEntriesMigration];
+const migrations: readonly Migration[] = [
+  createDiaryEntriesMigration,
+  addWeatherMetadataMigration,
+];
 
 export function applyMigrations(database: Database.Database): void {
   database.exec(`

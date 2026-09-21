@@ -41,6 +41,15 @@ export async function updateDiaryEntry({
     title: input.title.trim(),
     content: input.content.trim(),
     tags: normalizeTags(input.tags),
+    ...(input.weather === undefined
+      ? {}
+      : {
+          weather: {
+            location: input.weather.location.trim(),
+            summary: input.weather.summary.trim(),
+            source: input.weather.source.trim(),
+          },
+        }),
   };
   const validationResult = validateDiaryEntryInput(normalizedInput);
 
@@ -54,6 +63,9 @@ export async function updateDiaryEntry({
     content: normalizedInput.content,
     entryDate: normalizedInput.entryDate,
     tags: normalizedInput.tags,
+    ...(normalizedInput.weather === undefined
+      ? {}
+      : { weather: normalizedInput.weather }),
     createdAt: existingEntry.createdAt,
     updatedAt: now(),
   };

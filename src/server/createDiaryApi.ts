@@ -21,6 +21,15 @@ import {
   updateDiaryEntry,
   type UpdateDiaryEntryRepository,
 } from "../features/diary/application/updateDiaryEntry";
+import type { WeatherAgent } from "./WeatherAgentClient";
+
+const weatherMetadataSchema = z
+  .object({
+    location: z.string(),
+    summary: z.string(),
+    source: z.string(),
+  })
+  .strict();
 
 const diaryEntryInputSchema = z
   .object({
@@ -28,8 +37,19 @@ const diaryEntryInputSchema = z
     content: z.string(),
     entryDate: z.string(),
     tags: z.array(z.string()),
+    weather: weatherMetadataSchema.optional(),
   })
   .strict();
+
+function toDiaryEntryInput(input: z.infer<typeof diaryEntryInputSchema>) {
+  return {
+    title: input.title,
+    content: input.content,
+    entryDate: input.entryDate,
+    tags: input.tags,
+    ...(input.weather === undefined ? {} : { weather: input.weather }),
+  };
+}
 
 function isMalformedJsonError(error: unknown): boolean {
   return (
@@ -48,16 +68,43 @@ export interface CreateDiaryApiDependencies {
     DeleteDiaryEntryRepository;
   readonly generateId: () => string;
   readonly now: () => string;
+  readonly weatherAgent?: WeatherAgent;
 }
 
 export function createDiaryApi({
   repository,
   generateId,
   now,
+  weatherAgent,
 }: CreateDiaryApiDependencies): Express {
   const api = express();
 
   api.use(express.json());
+
+  api.post("/api/weather-summary", async (request, response) => {
+    const parsedInput = z
+      .object({ place: z.string().trim().min(1).max(200), date: z.string() })
+      .strict()
+      .safeParse(request.body);
+
+    if (!parsedInput.success) {
+      response.status(400).json({ message: "Invalid weather request." });
+      return;
+    }
+
+    if (weatherAgent === undefined) {
+      response.status(503).json({ message: "Weather agent is unavailable." });
+      return;
+    }
+
+    try {
+      response.json(
+        await weatherAgent.getSummary(parsedInput.data.place, parsedInput.data.date),
+      );
+    } catch {
+      response.status(502).json({ message: "Unable to fetch weather." });
+    }
+  });
 
   api.get("/api/entries", async (_request, response) => {
     const entries = await listDiaryEntries({ repository });
@@ -89,7 +136,7 @@ export function createDiaryApi({
 
     try {
       const result = await createDiaryEntry({
-        input: parsedInput.data,
+        input: toDiaryEntryInput(parsedInput.data),
         repository,
         generateId,
         now,
@@ -117,7 +164,7 @@ export function createDiaryApi({
     try {
       const result = await updateDiaryEntry({
         id: request.params.id,
-        input: parsedInput.data,
+        input: toDiaryEntryInput(parsedInput.data),
         repository,
         now,
       });

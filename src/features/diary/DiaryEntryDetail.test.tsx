@@ -38,4 +38,25 @@ describe("DiaryEntryDetail", () => {
     expect(screen.getByText(content)).toBeVisible();
     expect(document.querySelector("strong")).not.toBeInTheDocument();
   });
+
+  it("displays optional weather metadata with attribution", () => {
+    render(
+      <DiaryEntryDetail
+        entry={{
+          ...entry,
+          weather: {
+            location: "Helsinki, Suomi",
+            summary: "Päivä oli puolipilvinen.",
+            source: "Open-Meteo",
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByRole("region", { name: "Sää" })).toHaveTextContent(
+      "Helsinki, Suomi",
+    );
+    expect(screen.getByText("Päivä oli puolipilvinen.")).toBeVisible();
+    expect(screen.getByText("Säädata: Open-Meteo")).toBeVisible();
+  });
 });

@@ -3,6 +3,7 @@ import { drizzle } from "drizzle-orm/better-sqlite3";
 import { eq } from "drizzle-orm";
 
 import type { DiaryEntry } from "../application/createDiaryEntry";
+import type { WeatherMetadata } from "../domain/validateDiaryEntryInput";
 import { normalizeTags } from "../domain/normalizeTags";
 import { validateDiaryEntryInput } from "../domain/validateDiaryEntryInput";
 import { applyMigrations } from "./migrations";
@@ -36,8 +37,39 @@ function parseTags(serializedTags: string): readonly string[] | undefined {
   return parsedTags;
 }
 
+function parseWeatherMetadata(row: DiaryEntryRow): WeatherMetadata | undefined {
+  if (
+    row.weatherLocation === null &&
+    row.weatherSummary === null &&
+    row.weatherSource === null
+  ) {
+    return undefined;
+  }
+
+  if (
+    typeof row.weatherLocation !== "string" ||
+    typeof row.weatherSummary !== "string" ||
+    typeof row.weatherSource !== "string" ||
+    row.weatherLocation.trim().length === 0 ||
+    row.weatherSummary.trim().length === 0 ||
+    row.weatherSource.trim().length === 0 ||
+    row.weatherLocation !== row.weatherLocation.trim() ||
+    row.weatherSummary !== row.weatherSummary.trim() ||
+    row.weatherSource !== row.weatherSource.trim()
+  ) {
+    throw new Error("Stored diary entry is invalid.");
+  }
+
+  return {
+    location: row.weatherLocation,
+    summary: row.weatherSummary,
+    source: row.weatherSource,
+  };
+}
+
 function parseDiaryEntry(row: DiaryEntryRow): DiaryEntry {
   const tags = parseTags(row.tags);
+  const weather = parseWeatherMetadata(row);
 
   if (
     tags === undefined ||
@@ -51,6 +83,7 @@ function parseDiaryEntry(row: DiaryEntryRow): DiaryEntry {
       content: row.content,
       entryDate: row.entryDate,
       tags,
+      ...(weather === undefined ? {} : { weather }),
     }).isValid
   ) {
     throw new Error("Stored diary entry is invalid.");
@@ -71,6 +104,7 @@ function parseDiaryEntry(row: DiaryEntryRow): DiaryEntry {
     content: row.content,
     entryDate: row.entryDate,
     tags,
+    ...(weather === undefined ? {} : { weather }),
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
@@ -106,6 +140,9 @@ export class SqliteDiaryEntryRepository {
         content: entry.content,
         entryDate: entry.entryDate,
         tags: JSON.stringify(entry.tags),
+        weatherLocation: entry.weather?.location ?? null,
+        weatherSummary: entry.weather?.summary ?? null,
+        weatherSource: entry.weather?.source ?? null,
         createdAt: entry.createdAt,
         updatedAt: entry.updatedAt,
       })
@@ -138,6 +175,9 @@ export class SqliteDiaryEntryRepository {
         content: entry.content,
         entryDate: entry.entryDate,
         tags: JSON.stringify(entry.tags),
+        weatherLocation: entry.weather?.location ?? null,
+        weatherSummary: entry.weather?.summary ?? null,
+        weatherSource: entry.weather?.source ?? null,
         createdAt: entry.createdAt,
         updatedAt: entry.updatedAt,
       })

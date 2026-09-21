@@ -4,6 +4,7 @@ import type {
   DiaryEntryInput,
   ValidationResult,
 } from "./domain/validateDiaryEntryInput";
+import type { WeatherSummary } from "./domain/weather";
 
 export type NewEntryFormSubmitHandler = (
   input: DiaryEntryInput,
@@ -15,7 +16,12 @@ export interface NewEntryFormProps {
   readonly operationError?: string | undefined;
   readonly onSubmit?: NewEntryFormSubmitHandler;
   readonly onCancel?: () => void;
+  readonly cancelLabel?: string;
   readonly submitLabel?: string;
+  readonly onFetchWeather?: (
+    place: string,
+    date: string,
+  ) => Promise<WeatherSummary>;
 }
 
 export function NewEntryForm({
@@ -24,7 +30,9 @@ export function NewEntryForm({
   operationError,
   onSubmit,
   onCancel,
+  cancelLabel = "Cancel editing",
   submitLabel = "Save entry",
+  onFetchWeather,
 }: NewEntryFormProps) {
   const [title, setTitle] = useState(initialInput?.title ?? "");
   const [content, setContent] = useState(initialInput?.content ?? "");
@@ -32,6 +40,17 @@ export function NewEntryForm({
     initialInput?.entryDate ?? today,
   );
   const [tags, setTags] = useState(initialInput?.tags.join(", ") ?? "");
+  const [weatherLocation, setWeatherLocation] = useState(
+    initialInput?.weather?.location ?? "",
+  );
+  const [weatherSummary, setWeatherSummary] = useState(
+    initialInput?.weather?.summary ?? "",
+  );
+  const [weatherSource, setWeatherSource] = useState(
+    initialInput?.weather?.source ?? "",
+  );
+  const [weatherError, setWeatherError] = useState<string | undefined>(undefined);
+  const [isFetchingWeather, setIsFetchingWeather] = useState(false);
   const [validationResult, setValidationResult] = useState<
     ValidationResult | undefined
   >(undefined);
@@ -67,7 +86,7 @@ export function NewEntryForm({
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (onSubmit === undefined || isSubmitting) {
+    if (onSubmit === undefined || isSubmitting || isFetchingWeather) {
       return;
     }
 
@@ -79,11 +98,47 @@ export function NewEntryForm({
         content,
         entryDate,
         tags: tags.split(",").map((tag) => tag.trim()),
+        ...(weatherLocation.trim() && weatherSummary.trim() && weatherSource.trim()
+          ? {
+              weather: {
+                location: weatherLocation,
+                summary: weatherSummary,
+                source: weatherSource,
+              },
+            }
+          : {}),
       });
 
       setValidationResult(result);
     } finally {
       setIsSubmitting(false);
+    }
+  }
+
+  async function handleFetchWeather() {
+    if (onFetchWeather === undefined || isFetchingWeather) {
+      return;
+    }
+    if (!weatherLocation.trim()) {
+      setWeatherError("Anna paikkakunta ennen säähakua.");
+      return;
+    }
+    if (!entryDate) {
+      setWeatherError("Valitse päivämäärä ennen säähakua.");
+      return;
+    }
+
+    setIsFetchingWeather(true);
+    setWeatherError(undefined);
+    try {
+      const result = await onFetchWeather(weatherLocation, entryDate);
+      setWeatherLocation(result.location);
+      setWeatherSummary(result.summary);
+      setWeatherSource(result.source);
+    } catch {
+      setWeatherError("Säätietojen hakeminen epäonnistui. Yritä uudelleen.");
+    } finally {
+      setIsFetchingWeather(false);
     }
   }
 
@@ -142,7 +197,12 @@ export function NewEntryForm({
           errors?.entryDate === undefined ? undefined : "entry-date-error"
         }
         value={entryDate}
-        onChange={(event) => setEntryDate(event.target.value)}
+        onChange={(event) => {
+          setEntryDate(event.target.value);
+          setWeatherSummary("");
+          setWeatherSource("");
+          setWeatherError(undefined);
+        }}
       />
       {errors?.entryDate === undefined ? null : (
         <p className="field-error" id="entry-date-error" role="alert">
@@ -168,18 +228,72 @@ export function NewEntryForm({
         </p>
       )}
 
+      <fieldset className="weather-fields">
+        <legend>Sää (vapaaehtoinen)</legend>
+        <label htmlFor="weather-location">Paikkakunta</label>
+        <input
+          id="weather-location"
+          name="weatherLocation"
+          value={weatherLocation}
+          onChange={(event) => {
+            setWeatherLocation(event.target.value);
+            setWeatherSummary("");
+            setWeatherSource("");
+            setWeatherError(undefined);
+          }}
+        />
+        <button
+          className="secondary-action"
+          type="button"
+          onClick={() => void handleFetchWeather()}
+          disabled={isFetchingWeather || onFetchWeather === undefined}
+        >
+          {isFetchingWeather ? "Haetaan säätä…" : "Hae sää"}
+        </button>
+        {weatherError === undefined ? null : (
+          <p className="field-error" role="alert">{weatherError}</p>
+        )}
+        <label htmlFor="weather-summary">Sääkuvaus</label>
+        <textarea
+          id="weather-summary"
+          name="weatherSummary"
+          value={weatherSummary}
+          onChange={(event) => setWeatherSummary(event.target.value)}
+          maxLength={1_000}
+          disabled={!weatherSource}
+        />
+        {weatherSource ? <p className="weather-source">Säädata: {weatherSource}</p> : null}
+        {weatherSummary ? (
+          <button
+            className="secondary-action"
+            type="button"
+            onClick={() => {
+              setWeatherLocation("");
+              setWeatherSummary("");
+              setWeatherSource("");
+            }}
+          >
+            Poista sää
+          </button>
+        ) : null}
+      </fieldset>
+
       {isSubmitting ? <p role="status">Saving entry…</p> : null}
       {onCancel === undefined ? null : (
         <button
           className="secondary-action"
           type="button"
           onClick={onCancel}
-          disabled={isSubmitting}
+          disabled={isSubmitting || isFetchingWeather}
         >
-          Cancel editing
+          {cancelLabel}
         </button>
       )}
-      <button className="primary-action" type="submit" disabled={isSubmitting}>
+      <button
+        className="primary-action"
+        type="submit"
+        disabled={isSubmitting || isFetchingWeather}
+      >
         {submitLabel}
       </button>
     </form>

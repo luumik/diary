@@ -30,6 +30,7 @@ export function App({ client }: AppProps) {
             createEntry={client.createEntry}
             updateEntry={client.updateEntry}
             deleteEntry={client.deleteEntry}
+            fetchWeather={client.fetchWeather}
             today={currentLocalDate}
           />
         </div>

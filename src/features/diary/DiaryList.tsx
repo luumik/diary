@@ -58,7 +58,8 @@ export function DiaryList({
           <p className="eyebrow">Your journal</p>
           <h1>Diary entries</h1>
         </div>
-        <button className="primary-action" type="button" onClick={onCreateEntry}>
+        <button className="primary-action" type="button" onClick={onCreateEntry}
+          ref={focusTarget?.kind === "create-action" ? focusTargetRef : undefined}>
           New entry
         </button>
       </header>

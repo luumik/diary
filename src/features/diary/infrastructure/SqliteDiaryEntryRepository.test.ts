@@ -2,6 +2,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+import Database from "better-sqlite3";
 import { describe, expect, it } from "vitest";
 
 import type { DiaryEntry } from "../application/createDiaryEntry";
@@ -34,6 +35,16 @@ const updatedEntry: DiaryEntry = {
   content: "I finished the work I planned before lunch.",
   tags: ["Work"],
   updatedAt: "2026-08-16T12:00:00.000Z",
+};
+
+const weatherEntry: DiaryEntry = {
+  ...entry,
+  id: "entry-weather",
+  weather: {
+    location: "Helsinki, Suomi",
+    summary: "Päivä oli kirkas ja aurinkoinen.",
+    source: "Open-Meteo",
+  },
 };
 
 async function withTemporaryRepository(
@@ -92,6 +103,55 @@ describe("SqliteDiaryEntryRepository", () => {
 
       expect(await repository.findById(entry.id)).toEqual(updatedEntry);
     });
+  });
+
+  it("persists optional weather metadata", async () => {
+    await withTemporaryRepository(async (repository) => {
+      await repository.save(weatherEntry);
+
+      expect(await repository.findById(weatherEntry.id)).toEqual(weatherEntry);
+    });
+  });
+
+  it("migrates an existing diary database without losing entries", async () => {
+    const temporaryDirectory = await mkdtemp(join(tmpdir(), "diary-test-"));
+    const databasePath = join(temporaryDirectory, "diary.sqlite");
+    const legacyDatabase = new Database(databasePath);
+    legacyDatabase.exec(`
+      CREATE TABLE schema_migrations (id TEXT PRIMARY KEY NOT NULL);
+      INSERT INTO schema_migrations (id) VALUES ('0001_create_diary_entries');
+      CREATE TABLE diary_entries (
+        id TEXT PRIMARY KEY NOT NULL,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        entry_date TEXT NOT NULL,
+        tags TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+    `);
+    legacyDatabase.prepare(
+      "INSERT INTO diary_entries VALUES (?, ?, ?, ?, ?, ?, ?)",
+    ).run(
+      entry.id,
+      entry.title,
+      entry.content,
+      entry.entryDate,
+      JSON.stringify(entry.tags),
+      entry.createdAt,
+      entry.updatedAt,
+    );
+    legacyDatabase.close();
+
+    const repository = await SqliteDiaryEntryRepository.open({ databasePath });
+    try {
+      expect(await repository.findById(entry.id)).toEqual(entry);
+      await repository.update({ ...weatherEntry, id: entry.id });
+      expect((await repository.findById(entry.id))?.weather).toEqual(weatherEntry.weather);
+    } finally {
+      await repository.close();
+      await rm(temporaryDirectory, { recursive: true, force: true });
+    }
   });
 
   it("deletes an existing entry and reports a missing entry as not deleted", async () => {

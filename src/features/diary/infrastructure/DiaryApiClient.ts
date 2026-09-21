@@ -8,8 +8,9 @@ import {
   validateDiaryEntryInput,
   type DiaryEntryInput,
 } from "../domain/validateDiaryEntryInput";
+import type { WeatherSummary } from "../domain/weather";
 
-type FieldName = "title" | "content" | "entryDate" | "tags";
+type FieldName = "title" | "content" | "entryDate" | "tags" | "weather";
 type ValidationErrors = Readonly<Partial<Record<FieldName, string>>>;
 
 export type DiaryApiRequest = (
@@ -31,6 +32,7 @@ export interface DiaryApiClient {
     input: DiaryEntryInput,
   ): Promise<UpdateDiaryEntryResult>;
   deleteEntry(id: string): Promise<DeleteDiaryEntryResult>;
+  fetchWeather(place: string, date: string): Promise<WeatherSummary>;
 }
 
 function createApiError(): Error {
@@ -51,6 +53,25 @@ function isIsoTimestamp(value: unknown): value is string {
   return !Number.isNaN(timestamp.getTime()) && timestamp.toISOString() === value;
 }
 
+function parseWeatherMetadata(value: unknown) {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (
+    !isRecord(value) ||
+    typeof value.location !== "string" ||
+    typeof value.summary !== "string" ||
+    typeof value.source !== "string"
+  ) {
+    return null;
+  }
+  return {
+    location: value.location,
+    summary: value.summary,
+    source: value.source,
+  };
+}
+
 function isDiaryEntry(value: unknown): value is DiaryEntry {
   if (
     !isRecord(value) ||
@@ -66,16 +87,32 @@ function isDiaryEntry(value: unknown): value is DiaryEntry {
     return false;
   }
 
+  const weather = parseWeatherMetadata(value.weather);
+  if (weather === null) {
+    return false;
+  }
+
   return validateDiaryEntryInput({
     title: value.title,
     content: value.content,
     entryDate: value.entryDate,
     tags: value.tags,
+    ...(weather === undefined ? {} : { weather }),
   }).isValid;
 }
 
 function isFieldName(value: string): value is FieldName {
-  return value === "title" || value === "content" || value === "entryDate" || value === "tags";
+  return value === "title" || value === "content" || value === "entryDate" || value === "tags" || value === "weather";
+}
+
+function isWeatherSummary(value: unknown): value is WeatherSummary {
+  return (
+    isRecord(value) &&
+    typeof value.location === "string" &&
+    typeof value.date === "string" &&
+    typeof value.summary === "string" &&
+    value.source === "Open-Meteo"
+  );
 }
 
 function parseValidationErrors(value: unknown): ValidationErrors | undefined {
@@ -223,11 +260,30 @@ export function createDiaryApiClient({
     throw createApiError();
   }
 
+  async function fetchWeather(place: string, date: string): Promise<WeatherSummary> {
+    const response = await send(`${apiUrl}/api/weather-summary`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ place, date }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Unable to fetch weather. Try again.");
+    }
+
+    const body = await parseJson(response);
+    if (!isWeatherSummary(body)) {
+      throw createApiError();
+    }
+    return body;
+  }
+
   return {
     loadEntries,
     loadEntry,
     createEntry,
     updateEntry,
     deleteEntry,
+    fetchWeather,
   };
 }

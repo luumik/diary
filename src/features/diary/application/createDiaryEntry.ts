@@ -2,6 +2,7 @@ import {
   validateDiaryEntryInput,
   type DiaryEntryInput,
   type ValidationResult,
+  type WeatherMetadata,
 } from "../domain/validateDiaryEntryInput";
 import { normalizeTags } from "../domain/normalizeTags";
 
@@ -11,6 +12,7 @@ export interface DiaryEntry {
   readonly content: string;
   readonly entryDate: string;
   readonly tags: readonly string[];
+  readonly weather?: WeatherMetadata;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -45,6 +47,15 @@ export async function createDiaryEntry({
     title: input.title.trim(),
     content: input.content.trim(),
     tags: normalizeTags(input.tags),
+    ...(input.weather === undefined
+      ? {}
+      : {
+          weather: {
+            location: input.weather.location.trim(),
+            summary: input.weather.summary.trim(),
+            source: input.weather.source.trim(),
+          },
+        }),
   };
   const validationResult = validateDiaryEntryInput(normalizedInput);
 
@@ -59,6 +70,9 @@ export async function createDiaryEntry({
     content: normalizedInput.content,
     entryDate: normalizedInput.entryDate,
     tags: normalizedInput.tags,
+    ...(normalizedInput.weather === undefined
+      ? {}
+      : { weather: normalizedInput.weather }),
     createdAt: timestamp,
     updatedAt: timestamp,
   };
